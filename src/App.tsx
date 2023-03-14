@@ -29,6 +29,7 @@ interface Story {
   time: number;
   id: number;
   by: string;
+  type: string;
 }
 
 function App() {
@@ -36,14 +37,29 @@ function App() {
     async function loadStories() {
       try {
         const topStoriesIds = await getTopStoriesIds();
+        let stories: Story[] = [];
 
-        const getStoryPromises = topStoriesIds.map((id) =>
-          getJsonResource(
-            `https://hacker-news.firebaseio.com/v0/item/${id}.json`
-          )
-        );
+        // not all results are actual stories, some can be an "ask"
+        while (stories.length < 10) {
+          // load 10 possible stories at a time
+          const batch = topStoriesIds.splice(0, 10);
+          const batchPromises = batch.map((id) =>
+            getJsonResource(
+              `https://hacker-news.firebaseio.com/v0/item/${id}.json`
+            )
+          );
 
-        const stories: Story[] = await Promise.all(getStoryPromises);
+          const items = await Promise.all(batchPromises);
+
+          // a story has an url field and type "story"
+          stories = [
+            ...stories,
+            ...items.filter((s) => !!s.url && s.type === "story"),
+          ];
+        }
+
+        // keep only first 10
+        stories = stories.slice(0, 10);
 
         // sort ascending by score
         stories.sort((a, b) => a.score - b.score);
