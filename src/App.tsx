@@ -10,16 +10,16 @@ async function getJsonResource(url: string) {
   return response.json();
 }
 
-async function getTopStoriesIds(numItems: number = 10): Promise<number[]> {
-  const stories = await getJsonResource(
+async function getTopStoriesIds(): Promise<number[]> {
+  const ids = await getJsonResource(
     "https://hacker-news.firebaseio.com/v0/topstories.json"
   );
 
-  if (!Array.isArray(stories)) {
+  if (!Array.isArray(ids)) {
     throw new Error(`Content-type error! Expected response to be an array`);
   }
 
-  return stories.slice(0, numItems);
+  return ids;
 }
 
 interface Story {
