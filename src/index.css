@@ -52,4 +52,8 @@ body {
   a:hover {
     color: #747bff;
   }
+
+  .story-item {
+    border: 1px solid #030303;
+  }
 }
