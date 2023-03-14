@@ -43,13 +43,33 @@ type StoryItemProps = {
 };
 
 function StoryItem({ story }: StoryItemProps) {
+  const [karma, setKarma] = useState<number | null>(null);
+
+  useEffect(() => {
+    async function getKarma() {
+      try {
+        const authorInfo = await getJsonResource(
+          `https://hacker-news.firebaseio.com/v0/user/${story.by}.json`
+        );
+
+        setKarma(authorInfo.karma);
+      } catch {
+        // we won't handle the error here, we will simply not display author karma
+      }
+    }
+
+    getKarma();
+  }, []);
+
   // story timestamp is in seconds so we need to convert it to ms
   const date = new Date(story.time * 1000);
 
   return (
     <div>
       <h3>{story.title}</h3>
-      <div>By: {story.by}</div>
+      <div>
+        By: {story.by} {karma !== null && <span>({karma})</span>}
+      </div>
       <div>Score: {story.score}</div>
       <div>
         Posted on: {date.toDateString()} {date.toLocaleTimeString()}
