@@ -68,6 +68,9 @@ function StoryItem({ story }: StoryItemProps) {
     <div>
       <h3>{story.title}</h3>
       <div>
+        <img src={`https://picsum.photos/320/200?random=${story.id}`} />
+      </div>
+      <div>
         By: {story.by} {karma !== null && <span>({karma})</span>}
       </div>
       <div>Score: {story.score}</div>
