@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 async function getJsonResource(url: string) {
@@ -32,15 +32,50 @@ interface Story {
   type: string;
 }
 
+enum Status {
+  loading,
+  error,
+  completed,
+}
+
+type StoryItemProps = {
+  story: Story;
+};
+
+function StoryItem({ story }: StoryItemProps) {
+  // story timestamp is in seconds so we need to convert it to ms
+  const date = new Date(story.time * 1000);
+
+  return (
+    <div>
+      <h3>{story.title}</h3>
+      <div>By: {story.by}</div>
+      <div>Score: {story.score}</div>
+      <div>
+        Posted on: {date.toDateString()} {date.toLocaleTimeString()}
+      </div>
+      <div>
+        <a target="_blank" href={story.url}>
+          Read Story
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  const [status, setStatus] = useState<Status>(Status.loading);
+  const [error, setError] = useState<Error>();
+  const [stories, setStories] = useState<Story[]>();
+
   useEffect(() => {
     async function loadStories() {
       try {
         const topStoriesIds = await getTopStoriesIds();
-        let stories: Story[] = [];
+        let results: Story[] = [];
 
         // not all results are actual stories, some can be an "ask"
-        while (stories.length < 10) {
+        while (results.length < 10) {
           // load 10 possible stories at a time
           const batch = topStoriesIds.splice(0, 10);
           const batchPromises = batch.map((id) =>
@@ -52,21 +87,23 @@ function App() {
           const items = await Promise.all(batchPromises);
 
           // a story has an url field and type "story"
-          stories = [
-            ...stories,
+          results = [
+            ...results,
             ...items.filter((s) => !!s.url && s.type === "story"),
           ];
         }
 
         // keep only first 10
-        stories = stories.slice(0, 10);
+        results = results.slice(0, 10);
 
         // sort ascending by score
-        stories.sort((a, b) => a.score - b.score);
+        results.sort((a, b) => a.score - b.score);
 
-        console.log(stories);
+        setStatus(Status.completed);
+        setStories(results);
       } catch (e) {
-        console.log(e);
+        setStatus(Status.error);
+        setError(e as Error);
       }
     }
 
@@ -76,6 +113,12 @@ function App() {
   return (
     <div className="App">
       <h1>Top stories</h1>
+      <div>
+        {status === Status.loading && "Loading..."}
+        {status === Status.error && error?.message}
+        {status === Status.completed &&
+          stories?.map((s) => <StoryItem story={s} key={s.id} />)}
+      </div>
     </div>
   );
 }
