@@ -65,22 +65,31 @@ function StoryItem({ story }: StoryItemProps) {
   const date = new Date(story.time * 1000);
 
   return (
-    <div>
-      <h3>{story.title}</h3>
-      <div>
-        <img src={`https://picsum.photos/320/200?random=${story.id}`} />
+    <div className="story-item">
+      <div className="story-item-header">
+        <h3>{story.title}</h3>
+        <em>
+          {date.toDateString()} {date.toLocaleTimeString()}
+        </em>
       </div>
       <div>
-        By: {story.by} {karma !== null && <span>({karma})</span>}
+        <img src={`https://picsum.photos/300/200?random=${story.id}`} />
       </div>
-      <div>Score: {story.score}</div>
-      <div>
-        Posted on: {date.toDateString()} {date.toLocaleTimeString()}
-      </div>
-      <div>
-        <a target="_blank" href={story.url}>
-          Read Story
-        </a>
+      <div className="story-item-info">
+        <div>
+          By:{" "}
+          <strong>
+            {story.by} {karma !== null && <span>({karma})</span>}
+          </strong>{" "}
+        </div>
+        <div>
+          Score: <strong>{story.score}</strong>
+        </div>
+        <div>
+          <a target="_blank" href={story.url}>
+            Read full story
+          </a>
+        </div>
       </div>
     </div>
   );
@@ -136,7 +145,7 @@ function App() {
   return (
     <div className="App">
       <h1>Top stories</h1>
-      <div>
+      <div className="stories">
         {status === Status.loading && "Loading..."}
         {status === Status.error && error?.message}
         {status === Status.completed &&
