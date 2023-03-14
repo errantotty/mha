@@ -22,6 +22,15 @@ async function getTopStoriesIds(numItems: number = 10): Promise<number[]> {
   return stories.slice(0, numItems);
 }
 
+interface Story {
+  title: string;
+  url: string;
+  score: number;
+  time: number;
+  id: number;
+  by: string;
+}
+
 function App() {
   useEffect(() => {
     async function loadStories() {
@@ -34,7 +43,7 @@ function App() {
           )
         );
 
-        const stories = await Promise.all(getStoryPromises);
+        const stories: Story[] = await Promise.all(getStoryPromises);
 
         // sort ascending by score
         stories.sort((a, b) => a.score - b.score);
